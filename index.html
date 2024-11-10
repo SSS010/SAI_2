@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отправка координат</title>
+</head>
+<body>
+    <h1>Получение координат...</h1>
+    <p id="status">Запрос на определение вашего местоположения.</p>
+
+    <script>
+        function sendCoordinates(latitude, longitude) {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "http://localhost:5000/send_location", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(JSON.stringify({ latitude: latitude, longitude: longitude }));
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                document.getElementById("status").textContent = "Геолокация не поддерживается вашим браузером.";
+            }
+        }
+
+        function showPosition(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            document.getElementById("status").textContent = `Ваши координаты: ${latitude}, ${longitude}`;
+            sendCoordinates(latitude, longitude);
+        }
+
+        function showError(error) {
+            const status = document.getElementById("status");
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    status.textContent = "Вы отклонили запрос на геолокацию.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    status.textContent = "Информация о местоположении недоступна.";
+                    break;
+                case error.TIMEOUT:
+                    status.textContent = "Время запроса на геолокацию истекло.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    status.textContent = "Произошла неизвестная ошибка.";
+                    break;
+            }
+        }
+
+        getLocation();
+    </script>
+</body>
+</html>
